@@ -1,10 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageSection from "../../components/PageSection";
 import { useHistory } from "react-router-dom";
+import { useCart } from "../../store/contexts/cart";
 
 const Order = () => {
   const navigation = useHistory();
+  const {
+    state: { books },
+    actions: { resetCart },
+  } = useCart();
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (books.length) {
+      setTimeout(() => {
+        setIsLoading(false);
+        resetCart();
+      }, 3000);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [books]);
 
   return (
     <>
@@ -14,7 +29,7 @@ const Order = () => {
         </h1>
       </PageSection>
       <div className="mt-20 w-full items-center justify-center flex">
-        {!isLoading ? (
+        {isLoading ? (
           <img src="/loading.gif" alt="carregando" width={200} />
         ) : (
           <div className="flex-row justify-center">
