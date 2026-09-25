@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 import React, { createContext, useContext, useReducer } from "react";
 
 export type Book = {
@@ -24,6 +25,7 @@ interface CartContextProps {
   state: CartState;
   actions: {
     setIsCartOpen: (isOpen: boolean) => void;
+    addToCart: (book: CartBook) => void;
   };
 }
 
@@ -34,9 +36,27 @@ const cartReducer = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   action: { type: string; payload?: any },
 ): CartState => {
+  console.log("STATE:", state.books);
   switch (action.type) {
     case "SET_IS_CART_OPEN":
       return { ...state, isCartOpen: action.payload };
+    case "ADD_TO_CART":
+      const isBookInCart = state.books.find(
+        (book) => book.id === action.payload.id,
+      );
+      if (isBookInCart) {
+        const newBooks = state.books.map((book) => {
+          if (book.id === action.payload.id) {
+            return {
+              ...book,
+              quantity: book.quantity + action.payload.quantity,
+            };
+          }
+          return book;
+        });
+        return { ...state, books: newBooks };
+      }
+      return { ...state, books: [...state.books, action.payload] };
     default:
       return state;
   }
@@ -53,6 +73,8 @@ const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const actions = {
     setIsCartOpen: (isOpen: boolean) =>
       dispatch({ type: "SET_IS_CART_OPEN", payload: isOpen }),
+    addToCart: (book: CartBook) =>
+      dispatch({ type: "ADD_TO_CART", payload: book }),
   };
 
   return (
